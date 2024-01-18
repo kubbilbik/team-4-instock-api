@@ -1,6 +1,15 @@
 const knex = require("knex")(require("../knexfile"))
 const route = require("express").Router()
 
+route.get('/', async (req, res) => {
+    try {
+      const warehouses = await knex.select('*').from('warehouses');
+      res.status(200).json(warehouses);
+    } catch (error) {
+      res.status(500).json({ message: "Error retrieving warehouses", error: error.message });
+    }
+  });
+
 route.put("/:id", async (req, res) => {
     try {
         const updatedWarehouseData = req.body
