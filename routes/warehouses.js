@@ -38,4 +38,41 @@ route.delete("/:id", async (req, res) => {
 	}
 });
 
+
+route.post('/', async (req, res) => {
+  const {
+      warehouse_name,
+      address,
+      city,
+      country,
+      contact_name,
+      contact_position,
+      contact_phone,
+      contact_email
+  } = req.body;
+
+  if (!warehouse_name || !address || !city || !country || !contact_name || !contact_position || !contact_phone || !contact_email) {
+    return res.status(400).json({ message: "All fields are required." });
+}
+
+  try {
+      const [newWarehouseId] = await knex('warehouses').insert({
+          warehouse_name,
+          address,
+          city,
+          country,
+          contact_name,
+          contact_position,
+          contact_phone,
+          contact_email
+      }).returning('id');
+
+      const newWarehouse = await knex('warehouses').where({ id: newWarehouseId }).first();
+      res.status(201).json(newWarehouse);
+  } catch (error) {
+      res.status(500).json({ message: "Error creating warehouse", error: error.message });
+  }
+});
+
+
 module.exports = route;
