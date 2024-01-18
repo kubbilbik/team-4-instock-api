@@ -12,7 +12,7 @@ const PORT = process.env.PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/inventories', inventoryRoutes);
+app.use('/api/inventories', inventoryRouter);
 app.use("/api/warehouses", warehousesRouter);
 
 app.listen(PORT, console.log(`Server running on http://localhost:${PORT}`));
