@@ -8,9 +8,34 @@ route.get("/", async (_req, res) => {
       .select("inventories.*", "warehouses.warehouse_name");
     res.json(inventories);
   } catch (error) {
-    res.status(500).json({ error: true, message: "Could not fetch inventories from the database" });
+    res.status(404).json({ error: true, message: "Could not fetch inventories from the database" });
   }
 });
+
+route.get("/:id", async (req, res) => {
+  const inventoryId = req.params.id;
+
+  try {
+    const inventory = await knex("inventories")
+      .join("warehouses", "inventories.warehouse_id", "=", "warehouses.id")
+      .select("inventories.*", "warehouses.warehouse_name")
+      .where("inventories.id", inventoryId)
+      .first();
+
+    if (!inventory) {
+      return res.status(404).json({
+        error: true,
+        message: `Could not find inventory with ID: ${inventoryId}`,
+      });
+    }
+
+    res.json(inventory);
+  } catch (error) {
+    res.status(500).json({ error: true, message: `Could not fetch inventory ${inventoryId}` });
+  }
+});
+
+
 
 route.post("/", async (req, res) => {
 	try {
@@ -24,3 +49,4 @@ route.post("/", async (req, res) => {
 });
 
 module.exports = route;
+
