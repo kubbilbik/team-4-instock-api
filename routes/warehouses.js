@@ -40,6 +40,13 @@ route.delete("/:id", async (req, res) => {
 
 
 route.post('/', async (req, res) => {
+
+  const isValidEmail = (email) => {
+    return email.includes('@') && email.includes('.');
+  };
+
+
+
   const {
       warehouse_name,
       address,
@@ -53,7 +60,11 @@ route.post('/', async (req, res) => {
 
   if (!warehouse_name || !address || !city || !country || !contact_name || !contact_position || !contact_phone || !contact_email) {
     return res.status(400).json({ message: "All fields are required." });
-}
+  }
+  
+  if (!isValidEmail(contact_email)) {
+    return res.status(400).json({ message: "Invalid email address." });
+  }
 
   try {
       const [newWarehouseId] = await knex('warehouses').insert({
