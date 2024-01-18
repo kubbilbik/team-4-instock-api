@@ -7,10 +7,13 @@ const app = express();
 const warehousesRouter = require("./routes/warehouses");
 const inventoryRouter = require('./routes/inventory');
 
-const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
+
+
+const PORT = process.env.PORT || 8080;
+
 
 app.use('/api/inventories', inventoryRouter);
 app.use("/api/warehouses", warehousesRouter);
