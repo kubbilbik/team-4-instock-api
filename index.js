@@ -1,21 +1,18 @@
 const express = require('express');
 const cors = require('cors');
-const knex = require("knex")(require("./knexfile"));
-const PORT = process.env.PORT || 8080;
-
+require("dotenv").config();
 
 const app = express();
+
+const warehousesRouter = require("./routes/warehouses");
+const inventoryRouter = require('./routes/inventory');
+
+const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
 
+app.use('/api/inventories', inventoryRoutes);
+app.use("/api/warehouses", warehousesRouter);
 
-const inventoryRoutes = require('./routes/inventory');
-
-
-app.use('/inventories', inventoryRoutes);
-
-
-app.listen(PORT, () => {
-    console.log(`App running on port: ${PORT}`);
-  });  
+app.listen(PORT, console.log(`Server running on http://localhost:${PORT}`));
