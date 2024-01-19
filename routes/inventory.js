@@ -48,5 +48,57 @@ route.post("/", async (req, res) => {
 	}
 });
 
+
+route.put("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { warehouse_id, item_name, description, category, status, quantity } = req.body;
+
+    
+    if (![warehouse_id, item_name, description, category, status, quantity].every(prop => prop !== undefined)) {
+      return res.status(400).json({ message: "Missing properties in the request body" });
+    }
+
+    
+    if (isNaN(quantity)) {
+      return res.status(400).json({ message: `Quantity of ${quantity} is not a valid entry` });
+    }
+
+    
+    const warehouseExists = await knex("warehouses").where({ id: warehouse_id }).first();
+    if (isNaN(warehouse_id) || !warehouseExists) {
+      return res.status(400).json({ message: `Invalid or non-existent warehouse ID: ${warehouse_id}` });
+    }
+
+    
+    const updateData = {
+      warehouse_id,
+      item_name,
+      description,
+      category,
+      status,
+      quantity: parseInt(quantity),
+    };
+
+    const updatedRows = await knex("inventories").update(updateData).where({ id });
+
+    
+    if (updatedRows === 0) {
+      return res.status(404).json({ message: `Inventory with ID of ${id} does not exist, update failed` });
+    }
+
+    res.status(200).json({
+      id,
+      ...updateData,
+    });
+  } catch (error) {
+    console.error("Error updating Inventory Item:", error);
+    res.status(400).json({ message: `Error updating Inventory Item ${req.params.id}: ${error.message}` });
+  }
+});
+
+
+
+
 module.exports = route;
 
