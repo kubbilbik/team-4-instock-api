@@ -28,6 +28,26 @@ route.get('/:id', async (req, res) => {
 });
 
 
+route.get("/:id/inventories", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const warehouseExists = await knex("warehouses").where({ id }).first();
+    if (!warehouseExists) {
+      return res.status(404).json({ message: `Warehouse with ID ${id} not found` });
+    }
+   
+    const inventoryItems = await knex("inventories")
+      .where({ warehouse_id: id })
+      .select("id", "item_name", "category", "status", "quantity");
+
+    res.status(200).json(inventoryItems);
+  } catch (error) {
+    console.error("Error fetching inventory items:", error);
+    res.status(500).json({ message: "Error fetching inventory items" });
+  }
+});
+
 
 route.put("/:id", async (req, res) => {
 	try {
@@ -101,6 +121,8 @@ route.post('/', async (req, res) => {
       res.status(500).json({ message: "Error creating warehouse", error: error.message });
   }
 });
+
+
 
 
 module.exports = route;
