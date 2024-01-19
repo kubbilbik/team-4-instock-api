@@ -1,3 +1,5 @@
+const { Router } = require("express");
+
 const knex = require("knex")(require("../knexfile"));
 const route = require("express").Router();
 
@@ -112,5 +114,6 @@ route.delete("/:id", async (req, res) => {
 });
 
 
-module.exports = route;
 
+
+module.exports = route;
