@@ -98,6 +98,18 @@ route.put("/:id", async (req, res) => {
 });
 
 
+route.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    
+    await knex("inventories").where({ id }).delete();
+
+    res.status(200).send(`Inventory item with id: ${id} has been deleted`);
+  } catch (error) {
+    res.status(404).send(`Could not delete inventory item ${req.params.id}. ${error}`);
+  }
+});
 
 
 module.exports = route;
