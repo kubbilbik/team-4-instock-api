@@ -45,7 +45,7 @@ route.put("/:id", async (req, res) => {
     const updatedWarehouseDataKeys = Object.keys(updatedWarehouseData);
 
 		const doesAllDataExist = arrayDataToValidate.every((property) =>
-			Object.keys(updatedWarehouseDataKeys).includes(property)
+			updatedWarehouseDataKeys.includes(property)
 		);
 		if (!doesAllDataExist) {
 			return response
