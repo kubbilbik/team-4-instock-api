@@ -38,8 +38,26 @@ route.get("/:id", async (req, res) => {
 
 
 route.post("/", async (req, res) => {
+  const inventoryDataToValidate = ["warehouse_id", "item_name", "description", "category", "status", "quantity"];
 	try {
-		const newInventoryItemIDs = await knex("inventories").insert(req.body);
+    const newInventoryData = req.body;
+
+    const newInventoryDataKeys = Object.keys(newInventoryData);
+    const doesAllDataExist = inventoryDataToValidate.every((prop) => newInventoryDataKeys.includes(prop));
+    if (!doesAllDataExist) {
+      return res.status(400).json({ message: "Missing properties in the request body" });
+    }
+
+    const doesWarehouseIDExist = await knex("warehouses").where({ id: newInventoryData.warehouse_id }).first();
+    if (!doesWarehouseIDExist) {
+      return res.status(400).json({ message: `Invalid or non-existent warehouse ID: ${newInventoryData.warehouse_id}` });
+    }
+    const isQuantityANumber = !Number.isNaN(newInventoryData.quantity);
+    if (!isQuantityANumber) {
+      return res.status(400).json({ message: `Quantity of ${newInventoryData.quantity} is not a valid entry` });
+    }
+
+		const newInventoryItemIDs = await knex("inventories").insert(newInventoryData);
 		res.status(201).json(newInventoryItemIDs);
 	} catch (error) {
 		res
