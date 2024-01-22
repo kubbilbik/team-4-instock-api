@@ -50,25 +50,43 @@ route.get("/:id/inventories", async (req, res) => {
 
 
 route.put("/:id", async (req, res) => {
-	try {
-		const updatedWarehouseData = req.body;
-		const warehouseIDToUpdate = req.params.id;
-		await knex("warehouses")
-			.where({ id: warehouseIDToUpdate })
-			.update(updatedWarehouseData);
-		res.json(updatedWarehouseData);
-	} catch (error) {
-		res.status(400).json({
-			message: `Error updating warehouse with ID ${warehouseIDToUpdate}: ${error.message}`,
-		});
-	}
+  try {
+      const updatedWarehouseData = req.body;
+      const warehouseIDToUpdate = req.params.id;
+      
+       
+      const { warehouse_name, address, city, country, contact_name, contact_position, contact_phone, contact_email } = updatedWarehouseData;
+
+       
+      await knex("warehouses")
+          .where({ id: warehouseIDToUpdate })
+          .update({
+              warehouse_name,
+              address,
+              city,
+              country,
+              contact_name,
+              contact_position,
+              contact_phone,
+              contact_email
+          });
+
+      res.json(updatedWarehouseData);
+  } catch (error) {
+      res.status(400).json({
+          message: `Error updating warehouse with ID ${req.params.id}: ${error.message}`,
+      });
+  }
 });
+
 
 route.delete("/:id", async (req, res) => {
 	try {
 		const warehouseIDToDelete = req.params.id;
-		await knex("warehouses").where({ id: warehouseIDToDelete }).del();
-	} catch (error) {
+		await knex("warehouses").where({  id: warehouseIDToDelete }).delete();
+    res.sendStatus(204); 
+    }
+	 catch (error) {
 		res.status(400).json({
 			message: `Error deleting warehouse with ID ${warehouseIDToDelete}: ${error.message}`,
 		});
