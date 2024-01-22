@@ -29,29 +29,27 @@ route.get("/:id", async (req, res) => {
 	}
 });
 
-
-
 route.get("/:id/inventories", async (req, res) => {
-  try {
-    const { id } = req.params;
+	try {
+		const { id } = req.params;
 
-    const warehouseExists = await knex("warehouses").where({ id }).first();
-    if (!warehouseExists) {
-      return res.status(404).json({ message: `Warehouse with ID ${id} not found` });
-    }
-   
-    const inventoryItems = await knex("inventories")
-      .where({ warehouse_id: id })
-      .select("id", "item_name", "category", "status", "quantity");
+		const warehouseExists = await knex("warehouses").where({ id }).first();
+		if (!warehouseExists) {
+			return res
+				.status(404)
+				.json({ message: `Warehouse with ID ${id} not found` });
+		}
 
-    res.status(200).json(inventoryItems);
-  } catch (error) {
-    console.error("Error fetching inventory items:", error);
-    res.status(500).json({ message: "Error fetching inventory items" });
-  }
+		const inventoryItems = await knex("inventories")
+			.where({ warehouse_id: id })
+			.select("id", "item_name", "category", "status", "quantity");
+
+		res.status(200).json(inventoryItems);
+	} catch (error) {
+		console.error("Error fetching inventory items:", error);
+		res.status(500).json({ message: "Error fetching inventory items" });
+	}
 });
-
-
 
 route.put("/:id", async (req, res) => {
 	const arrayDataToValidate = [
@@ -64,38 +62,34 @@ route.put("/:id", async (req, res) => {
 		"contact_phone",
 		"contact_email",
 	];
+	const warehouseIDToUpdate = req.params.id;
 	try {
 		const updatedWarehouseData = req.body;
-    const updatedWarehouseDataKeys = Object.keys(updatedWarehouseData);
+		const updatedWarehouseDataKeys = Object.keys(updatedWarehouseData);
 
-		const doesAllDataExist = arrayDataToValidate.every((property) =>
-			updatedWarehouseDataKeys.includes(property)
+		const doesAllDataExist = arrayDataToValidate.findIndex((property) =>
+			!updatedWarehouseDataKeys.includes(property)
 		);
-		if (!doesAllDataExist) {
-			return response
+		if (doesAllDataExist !== -1) {
+			return res
 				.status(400)
-				.json({ message: "Missing properties in the request body." });
+				.json({ message: `Missing properties in the request body: ${arrayDataToValidate[doesAllDataExist]}, [${doesAllDataExist}], ${updatedWarehouseData} ${updatedWarehouseDataKeys}` });
 		}
 
 		const { contact_phone, contact_email } = updatedWarehouseData;
 		if (!contact_email.includes("@") || !contact_email.includes(".")) {
-			return res
-				.status(400)
-				.json({
-					message:
-						"Invalid email address. Please ensure your email includes an '@' and a '.'.",
-				});
+			return res.status(400).json({
+				message:
+					"Invalid email address. Please ensure your email includes an '@' and a '.'.",
+			});
 		}
 		if (!contact_phone.match(/\+1 \(\d{3}\) \d{3}-\d{4}/)) {
-			return res
-				.status(400)
-				.json({
-					message:
-						"Invalid phone number. Please use the following format: +1 (999) 999-9999.",
-				});
+			return res.status(400).json({
+				message:
+					"Invalid phone number. Please use the following format: +1 (999) 999-9999.",
+			});
 		}
 
-		const warehouseIDToUpdate = req.params.id;
 		await knex("warehouses")
 			.where({ id: warehouseIDToUpdate })
 			.update(updatedWarehouseData);
@@ -108,8 +102,8 @@ route.put("/:id", async (req, res) => {
 });
 
 route.delete("/:id", async (req, res) => {
+	const warehouseIDToDelete = req.params.id;
 	try {
-		const warehouseIDToDelete = req.params.id;
 		await knex("warehouses").where({ id: warehouseIDToDelete }).del();
 		res.sendStatus(204);
 	} catch (error) {
@@ -176,6 +170,5 @@ route.post("/", async (req, res) => {
 			.json({ message: "Error creating warehouse", error: error.message });
 	}
 });
-
 
 module.exports = route;
